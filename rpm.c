@@ -14,12 +14,12 @@ task main()
 		motor[port2] = 127;
 		motor[port3] = -127;
 
-		wait1Msec(10);
+		wait1Msec(100);
 
 		float curr = SensorValue[enc];
-		float vel = (curr) / (0.000166667*60000);
+		float vel = (curr / 1.66667) * 5;
 		//float vel = (curr) / (0.000166667);
 		//float lastPos = SensorValue[enc];
-		writeDebugStreamLine("%d", vel/);
+		writeDebugStreamLine("%f", vel);
 	}
 }
