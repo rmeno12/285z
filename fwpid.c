@@ -9,7 +9,6 @@ float rpm()
 
 	float curr = SensorValue[enc];
 	float rpm = (curr / 0.166667) * 5;
-	//writeDebugStreamLine("rpm is %f: ", rpm);
 
 	return rpm;
 }
