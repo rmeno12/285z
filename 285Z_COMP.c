@@ -62,8 +62,8 @@ void pre_auton()
 task autonomous()
 {
 	//start moving forward
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100;
-	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 100;
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -100;
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -100;
 	
 	//keep moving forward for 2500 ms
 	wait(2500);
