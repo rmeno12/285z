@@ -1,4 +1,4 @@
-#pragma config(Sensor, in1,    pot_cap,        sensorPotentiometer)
+#pragma config(Sensor, in1,    pot_arm,        sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  enc_fw,         sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  enc_drive,      sensorQuadEncoder)
 #pragma config(Motor,  port1,           intake_cap,    tmotorVex393_HBridge, openLoop)
@@ -44,9 +44,14 @@ void pre_auton()
 	// running between Autonomous and Driver controlled modes. You will need to
 	// manage all user created tasks if set to false.
 	bStopTasksBetweenModes = true;
-	SensorValue[enc_fw] = 0;
-	SensorValue[enc_drive] = 0;
-	SensorValue[pot_cap] = 0;
+
+	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
+	// used by the competition include file, for example, you might want
+	// to display your team name on the LCD in this function.
+	// bDisplayCompetitionStatusOnLcd = false;
+
+	// All activities that occur before the competition starts
+	// Example: clearing encoders, setting servo positions, ...
 }
 
 /*---------------------------------------------------------------------------*/
@@ -61,16 +66,12 @@ void pre_auton()
 
 task autonomous()
 {
-	//start moving forward
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -100;
-	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -100;
-	
-	//keep moving forward for 2500 ms
-	wait(2500);
-	
-	//stop moving forward
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 0;
-	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 0;
+	// ..........................................................................
+	// Insert user code here.
+	// ..........................................................................
+
+	// Remove this function call once you have "real" code.
+	AutonomousCodePlaceholderForTesting();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -92,6 +93,36 @@ float rpm(){
 	return rpm;
 }
 
+
+const unsigned int TrueSpeed[128] =
+{
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0, 21, 21, 21, 22, 22, 22, 23, 24, 24,
+	25, 25, 25, 25, 26, 27, 27, 28, 28, 28,
+	28, 29, 30, 30, 30, 31, 31, 32, 32, 32,
+	33, 33, 34, 34, 35, 35, 35, 36, 36, 37,
+	37, 37, 37, 38, 38, 39, 39, 39, 40, 40,
+	41, 41, 42, 42, 43, 44, 44, 45, 45, 46,
+	46, 47, 47, 48, 48, 49, 50, 50, 51, 52,
+	52, 53, 54, 55, 56, 57, 57, 58, 59, 60,
+	61, 62, 63, 64, 65, 66, 67, 67, 68, 70,
+	71, 72, 72, 73, 74, 76, 77, 78, 79, 79,
+	80, 81, 83, 84, 84, 86, 86, 87, 87, 88,
+	88, 89, 89, 90, 90, 127, 127, 127
+};
+
+float jarize(int speed_raw)
+{
+	float	speed_temp;
+
+	if(speed_raw >= 0)
+	{speed_temp = (speed_raw * speed_raw) / 127;}
+	else
+	{speed_temp = (speed_raw * speed_raw) / -127;}
+
+	return floor(speed_temp);
+}
+
 task usercontrol()
 {
 	motor[flywheel] = 40;
@@ -99,17 +130,27 @@ task usercontrol()
 	while (true)
 	{
 		//tank drive
-		motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = vexRT[Ch2];
-		motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = vexRT[Ch3];
+		motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = TrueSpeed[jarize(vexRT[Ch2])];
+		motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = TrueSpeed[jarize(vexRT[Ch3])];
+
 
 		//bang bang control for flywheel
 		if(rpm() < target){
-			motor[flywheel] = 70;
+			motor[flywheel] = 100;
 		}
 		else
 		{
-			motor[flywheel] = 50;
+			motor[flywheel] = 60;
 		}
+
+		//Flywheel Target//
+		if(vexRT[Btn8L]){
+			target = 900;
+		}
+		else if(vexRT[Btn8D]){
+			target = 450;
+		}
+
 
 		//joystick controls for other motors
 		if(vexRT[Btn5U]){
@@ -130,13 +171,6 @@ task usercontrol()
 		}
 		else{
 			motor[intake_ball] = 0;
-		}
-
-		if(vexRT[Btn8U]){
-			target = 1100;
-		}
-		else if(vexRT[Btn8D]){
-			target = 400;
 		}
 
 		if(vexRT[Btn7L]){
