@@ -40,18 +40,10 @@
 
 void pre_auton()
 {
-	// Set bStopTasksBetweenModes to false if you want to keep user created tasks
-	// running between Autonomous and Driver controlled modes. You will need to
-	// manage all user created tasks if set to false.
 	bStopTasksBetweenModes = true;
-
-	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
-	// used by the competition include file, for example, you might want
-	// to display your team name on the LCD in this function.
-	// bDisplayCompetitionStatusOnLcd = false;
-
-	// All activities that occur before the competition starts
-	// Example: clearing encoders, setting servo positions, ...
+	SensorValue[enc_fw] = 0;
+	SensorValue[enc_drive] = 0;
+	SensorValue[pot_arm] = 0;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -66,12 +58,16 @@ void pre_auton()
 
 task autonomous()
 {
-	// ..........................................................................
-	// Insert user code here.
-	// ..........................................................................
-
-	// Remove this function call once you have "real" code.
-	AutonomousCodePlaceholderForTesting();
+	//start moving forward
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -100;
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -100;
+	
+	//keep moving forward for 2500 ms
+	wait(2500);
+	
+	//stop moving forward
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 0;
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 0;
 }
 
 /*---------------------------------------------------------------------------*/
