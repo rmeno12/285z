@@ -43,6 +43,8 @@
 void pre_auton()
 {
 	bStopTasksBetweenModes = true;
+	
+	//calibrate sensors
 	SensorValue[enc_fw] = 0;
 	SensorValue[enc_drive] = 0;
 	SensorValue[pot_arm] = 0;
@@ -58,6 +60,7 @@ void pre_auton()
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
+//measures rpm
 float rpm(){
 	SensorValue[enc_fw] = 0;
 	wait1Msec(10);
@@ -81,6 +84,7 @@ task autonomous()
 	else if(rpm() > 930) {motor[flywheel] = 30;}
 	*/
 
+	//shoot high flag then stop flywheel
 	motor[flywheel] = 127;
 	wait1Msec(5500);
 	motor[intake_ball] = 127;
@@ -99,6 +103,7 @@ task autonomous()
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
+//TrueSpeed array for linearizing drive
 const unsigned int TrueSpeed[128] =
 {
 	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -119,14 +124,11 @@ const unsigned int TrueSpeed[128] =
 /*float jarize(int speed_raw)
 {
 float	speed_temp;
-
 if(speed_raw >= 0)
 {speed_temp = (speed_raw * speed_raw) / 127;}
 else
 {speed_temp = (speed_raw * speed_raw) / -127;}
-
 if(speed_temp <= 122) {speed_temp = speed_temp +5;
-
 return floor(speed_temp);
 }*/
 
@@ -140,25 +142,14 @@ task usercontrol()
 
 	while (true)
 	{
-		if(vexRT[Ch2] <= 0)
-		{
-			speed_drive_R = -TrueSpeed[abs(vexRT[Ch2])];
-		}
-		else
-		{
-			speed_drive_R = TrueSpeed[vexRT[Ch2]];
-		}
+		//applying TrueSpeed to linearize drive output
+		if(vexRT[Ch2] <= 0){speed_drive_R = -TrueSpeed[abs(vexRT[Ch2])];}
+		else{speed_drive_R = TrueSpeed[vexRT[Ch2]];}
 
-		if(vexRT[Ch3] <= 0)
-		{
-			speed_drive_L = -TrueSpeed[abs(vexRT[Ch3])];
-		}
-		else
-		{
-			speed_drive_L = TrueSpeed[vexRT[Ch3]];
-		}
+		if(vexRT[Ch3] <= 0){speed_drive_L = -TrueSpeed[abs(vexRT[Ch3])];}
+		else{speed_drive_L = TrueSpeed[vexRT[Ch3]];}
 
-		//tank drive
+		//tank drive with joystick
 		motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = speed_drive_R;
 		motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = speed_drive_L;
 
@@ -169,7 +160,7 @@ task usercontrol()
 		else if(rpm() > target)
 		{motor[flywheel] = 30;}
 
-		//Flywheel Target//
+		//setting flywheel target with joystick
 		if(vexRT[Btn8L]){
 			target = 920;
 		}
@@ -179,7 +170,7 @@ task usercontrol()
 		}
 
 
-		//joystick controls for other motors
+		//joystick control for lift
 		if(vexRT[Btn5U]){
 			motor[lift] = 127;
 		}
@@ -190,6 +181,7 @@ task usercontrol()
 			motor[lift] = 0;
 		}
 
+		//joystick control for ball intake
 		if(vexRT[Btn6U]){
 			motor[intake_ball] = 100;
 		}
@@ -200,6 +192,7 @@ task usercontrol()
 			motor[intake_ball] = 0;
 		}
 
+		//joystick control for cap intake
 		if(vexRT[Btn7L]){
 			motor[intake_cap] = -60;
 		}
