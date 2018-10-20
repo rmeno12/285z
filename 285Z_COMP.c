@@ -60,7 +60,7 @@ void pre_auton()
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
-//measures "rpm"
+//measures flywheel speed in "rpm"
 float rpm(){
 	SensorValue[enc_fw] = 0;
 	wait1Msec(10);
