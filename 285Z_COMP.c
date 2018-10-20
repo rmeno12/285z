@@ -1,4 +1,6 @@
-#pragma config(Sensor, in1,    pot_arm,        sensorPotentiometer)
+#pragma config(UART_Usage, UART1, uartVEXLCD, baudRate19200, IOPins, None, None)
+#pragma config(UART_Usage, UART2, uartNotUsed, baudRate4800, IOPins, None, None)
+#pragma config(Sensor, in1,    pot_arm,        sensorNone)
 #pragma config(Sensor, dgtl1,  enc_fw,         sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  enc_drive,      sensorQuadEncoder)
 #pragma config(Motor,  port1,           intake_cap,    tmotorVex393_HBridge, openLoop)
@@ -56,18 +58,35 @@ void pre_auton()
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
+float rpm(){
+	SensorValue[enc_fw] = 0;
+	wait1Msec(10);
+
+	float curr = SensorValue[enc_fw];
+	float rpm = (curr / 0.1666667) * 5;
+
+	clearLCDLine(0);
+	clearLCDLine(1);
+	displayLCDNumber(0, 5, rpm);
+
+	return rpm;
+}
+
 task autonomous()
 {
-	//start moving forward
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -100;
-	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -100;
-	
-	//keep moving forward for 2500 ms
-	wait(2500);
-	
-	//stop moving forward
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 0;
-	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 0;
+
+	//Bang Bang
+	/*
+	if(rpm() < 930) {motor[flywheel] = 80;}
+	else if(rpm() > 930) {motor[flywheel] = 30;}
+	*/
+
+	motor[flywheel] = 127;
+	wait1Msec(5500);
+	motor[intake_ball] = 127;
+	wait1Msec(1000);
+	motor[flywheel] = motor[intake_ball] = 0;
+
 }
 
 /*---------------------------------------------------------------------------*/
@@ -79,16 +98,6 @@ task autonomous()
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
-float rpm(){
-	SensorValue[enc_fw] = 0;
-	wait1Msec(100);
-
-	float curr = SensorValue[enc_fw];
-	float rpm = (curr / 1.666667) * 5;
-
-	return rpm;
-}
-
 
 const unsigned int TrueSpeed[128] =
 {
@@ -107,44 +116,66 @@ const unsigned int TrueSpeed[128] =
 	88, 89, 89, 90, 90, 127, 127, 127
 };
 
-float jarize(int speed_raw)
+/*float jarize(int speed_raw)
 {
-	float	speed_temp;
+float	speed_temp;
 
-	if(speed_raw >= 0)
-	{speed_temp = (speed_raw * speed_raw) / 127;}
-	else
-	{speed_temp = (speed_raw * speed_raw) / -127;}
+if(speed_raw >= 0)
+{speed_temp = (speed_raw * speed_raw) / 127;}
+else
+{speed_temp = (speed_raw * speed_raw) / -127;}
 
-	return floor(speed_temp);
-}
+if(speed_temp <= 122) {speed_temp = speed_temp +5;
+
+return floor(speed_temp);
+}*/
 
 task usercontrol()
 {
 	motor[flywheel] = 40;
 	int target = 0;
+
+	int speed_drive_L = 0;
+	int speed_drive_R = 0;
+
 	while (true)
 	{
-		//tank drive
-		motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = TrueSpeed[jarize(vexRT[Ch2])];
-		motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = TrueSpeed[jarize(vexRT[Ch3])];
-
-
-		//bang bang control for flywheel
-		if(rpm() < target){
-			motor[flywheel] = 100;
+		if(vexRT[Ch2] <= 0)
+		{
+			speed_drive_R = -TrueSpeed[abs(vexRT[Ch2])];
 		}
 		else
 		{
-			motor[flywheel] = 60;
+			speed_drive_R = TrueSpeed[vexRT[Ch2]];
 		}
+
+		if(vexRT[Ch3] <= 0)
+		{
+			speed_drive_L = -TrueSpeed[abs(vexRT[Ch3])];
+		}
+		else
+		{
+			speed_drive_L = TrueSpeed[vexRT[Ch3]];
+		}
+
+		//tank drive
+		motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = speed_drive_R;
+		motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = speed_drive_L;
+
+
+		//bang bang control for flywheel
+		if(rpm() < target)
+		{motor[flywheel] = 70;}
+		else if(rpm() > target)
+		{motor[flywheel] = 30;}
 
 		//Flywheel Target//
 		if(vexRT[Btn8L]){
-			target = 900;
+			target = 920;
 		}
 		else if(vexRT[Btn8D]){
-			target = 450;
+			target = 720;
+			motor[flywheel] = 0;
 		}
 
 
