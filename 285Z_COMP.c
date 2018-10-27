@@ -79,8 +79,8 @@ task autonomous()
 	int high = 0;
 	int low = 0;
 		
-	//target = 930; high = 80; low = 30;					//FRONT
-	target = 1100;	high = 90; low = 40;				//BACK
+	target = 930; high = 80; low = 30;					//FRONT
+	//target = 1025;	high = 80; low = 30;				//BACK
 		
 	while(counter < 295)
 	{
@@ -90,18 +90,27 @@ task autonomous()
 	else if(rpm() > target) {motor[flywheel] = low;}
 	if(rpm() >= target) {motor[intake_ball] = 127;}
 	}
-	/*
+	
 	motor[flywheel] = motor[intake_ball] = 0;
 	
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;	//RED
-	//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 65;		//BLUE
+	//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;	//RED
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 65;		//BLUE
 		wait1Msec(1500);
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//RED
-	//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -27; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//BLUE
-		wait1Msec(750); 
+	//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//RED
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -27; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//BLUE
+		wait1Msec(500); 
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -10;
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
-	*/
+	
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;
+		wait1Msec(1500);
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -127;
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;
+		wait1Msec(1000);
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;
+		wait1Msec(3000);
+	
+	
 }
 
 /*---------------------------------------------------------------------------*/
