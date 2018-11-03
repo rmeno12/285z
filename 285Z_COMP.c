@@ -2,7 +2,8 @@
 #pragma config(UART_Usage, UART2, uartNotUsed, baudRate4800, IOPins, None, None)
 #pragma config(Sensor, in1,    pot_arm,        sensorNone)
 #pragma config(Sensor, dgtl1,  enc_fw,         sensorQuadEncoder)
-#pragma config(Sensor, dgtl3,  enc_drive,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl3,  enc_drive_right, sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  enc_drive_left, sensorQuadEncoder)
 #pragma config(Motor,  port1,           intake_cap,    tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           drive_r1,      tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port3,           drive_r2,      tmotorVex393_MC29, openLoop, reversed)
@@ -44,7 +45,8 @@ void pre_auton()
 {
 	bStopTasksBetweenModes = true;
 	SensorValue[enc_fw] = 0;
-	SensorValue[enc_drive] = 0;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
 	SensorValue[pot_arm] = 0;
 }
 
@@ -72,46 +74,207 @@ float rpm(){
 	return rpm;
 }
 
-task autonomous()
-{
-	int counter = 0;	
+void red(){
+	int counter = 0;
 	int target = 0;
 	int high = 0;
 	int low = 0;
-		
-	target = 930; high = 80; low = 30;					//FRONT
+	int error = 10000;
+	int enc_target = 700;
+
+	target = 930; high = 100; low = 50;					//FRONT
 	//target = 1025;	high = 80; low = 30;				//BACK
-		
-	while(counter < 295)
+
+	while(counter < 350)
 	{
-	counter++; 	
-	
-	if(rpm() < target) {motor[flywheel] = high;}
-	else if(rpm() > target) {motor[flywheel] = low;}
-	if(rpm() >= target) {motor[intake_ball] = 127;}
+		counter++;
+
+		if(rpm() < target) {motor[flywheel] = high;}
+		else if(rpm() > target) {motor[flywheel] = low;}
+		if(rpm() >= target) {motor[intake_ball] = 127;}
 	}
-	
+
 	motor[flywheel] = motor[intake_ball] = 0;
-	
-	//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;	//RED
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 65;		//BLUE
-		wait1Msec(1500);
-	//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//RED
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -27; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//BLUE
-		wait1Msec(500); 
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -10;
+
+	while(error > 0){
+		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 120;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 60;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
+
+	wait1Msec(300);
+	error = 10000;
+	enc_target = -970;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	while(error > 0){
+		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -120;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -60;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
+
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -100;
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 100;
+	wait1Msec(500);
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 10;
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
-	
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;
-		wait1Msec(1500);
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -127;
-	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;
-		wait1Msec(1000);
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;
-		wait1Msec(3000);
-	
-	
+
+	error = 10000;
+	enc_target = -700;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	while(error > 0){
+		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -120;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -60;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 }
+
+void blue(){
+	int counter = 0;
+	int target = 0;
+	int high = 0;
+	int low = 0;
+	int error = 10000;
+	int enc_target = 700;
+
+	target = 930; high = 100; low = 50;					//FRONT
+	//target = 1025;	high = 80; low = 30;				//BACK
+
+	while(counter < 350)
+	{
+		counter++;
+
+		if(rpm() < target) {motor[flywheel] = high;}
+		else if(rpm() > target) {motor[flywheel] = low;}
+		if(rpm() >= target) {motor[intake_ball] = 127;}
+	}
+
+	motor[flywheel] = motor[intake_ball] = 0;
+
+	while(error > 0){
+		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 120;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 70;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 60;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 40;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
+
+	wait1Msec(300);
+	error = 10000;
+	enc_target = -970;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	while(error > 0){
+		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -120;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -70;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -60;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -40;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
+
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100;
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -100;
+	wait1Msec(500);
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -10;
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
+
+	error = 10000;
+	enc_target = -700;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	while(error > 0){
+		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -120;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -70;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -60;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -40;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
+}
+
+task autonomous()
+{
+	bool is_red = false;
+	if(is_red){
+		red();
+	}
+	else{
+		blue();
+	}
+
+}
+/*
+motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;	//RED
+//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 65;		//BLUE
+wait1Msec(1500);
+motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//RED
+//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -27; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//BLUE
+wait1Msec(500);
+motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -10;
+motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
+
+motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;
+wait1Msec(1500);
+motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -127;
+motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;
+wait1Msec(1000);
+motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;
+wait1Msec(3000);
+*/
+
+
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
