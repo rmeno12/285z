@@ -4,7 +4,7 @@
 #pragma config(Sensor, dgtl1,  enc_fw,         sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  enc_drive_right, sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  enc_drive_left, sensorQuadEncoder)
-#pragma config(Motor,  port1,           intake_cap,    tmotorVex393_HBridge, openLoop)
+#pragma config(Motor,  port1,           indexer,       tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           drive_r1,      tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port3,           drive_r2,      tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port4,           drive_r3,      tmotorVex393_MC29, openLoop, reversed)
@@ -81,15 +81,14 @@ void red(){
 	int low = 0;
 	int error = 10000;
 	int enc_target = 700;
-	int enc_drive_average = (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
-
+	
 	/*/FRONT/*/	target = 930; high = 100; low = 50;
 	/*/BACK/*/	//target = 1025; high = 80; low = 30;
 
 	while(counter < 350)
 	{
 		counter++;
-		
+
 		if(rpm() < target) {motor[flywheel] = high;}		
 		else if(rpm() > target) {motor[flywheel] = low;}	
 
@@ -98,12 +97,12 @@ void red(){
 	motor[flywheel] = motor[intake_ball] = 0;			/*/STOP FLYWHEEL AND BALL INTAKE/*/
 
 	while(error > 0){
-		error = enc_target - enc_drive_average;
+		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
 		if(error > 150) {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 120;}
-			   else {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 60;}
+		else {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 60;}
 	}
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
 
@@ -114,12 +113,12 @@ void red(){
 	SensorValue[enc_drive_right] = 0;
 
 	while(error > 0){
-		error = abs(enc_target - enc_drive_average);
+		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
 		if(error > 150) {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -120;}
-			   else {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -60;}
+		else {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -60;}
 	}
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 
@@ -135,7 +134,7 @@ void red(){
 	SensorValue[enc_drive_right] = 0;
 
 	while(error > 0){
-		error = abs(enc_target - enc_drive_average);
+		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
@@ -156,7 +155,6 @@ void blue(){
 	int low = 0;
 	int error = 10000;
 	int enc_target = 700;
-	int enc_drive_average = (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
 
 	/*/FRONT/*/	target = 930; high = 100; low = 50;
 	/*/BACK/*/	//target = 1025; high = 80; low = 30;
@@ -167,13 +165,13 @@ void blue(){
 
 		if(rpm() < target) {motor[flywheel] = high;}
 		else if(rpm() > target) {motor[flywheel] = low;}
-		
+
 		if(rpm() >= target) {motor[intake_ball] = 127;}		/*/SHOOT THE BALL/*/
 	}
 	motor[flywheel] = motor[intake_ball] = 0;
 
 	while(error > 0){
-		error = enc_target - enc_drive_average;
+		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
@@ -195,7 +193,7 @@ void blue(){
 	SensorValue[enc_drive_right] = 0;
 
 	while(error > 0){
-		error = abs(enc_target - enc_drive_average);
+		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
@@ -242,7 +240,7 @@ task autonomous()
 {
 	bool is_red = false;
 	if(is_red)	{red();}
-	else(!is_red)	{blue();}
+	else				{blue();}
 
 }
 
@@ -317,6 +315,8 @@ task usercontrol()
 	int speed_drive_L = 0;
 	int speed_drive_R = 0;
 
+	bool toggle_ball = false;
+
 	while (true)
 	{
 		if(vexRT[Ch2] <= 0)
@@ -370,23 +370,27 @@ task usercontrol()
 		}
 
 		if(vexRT[Btn6U]){
-			motor[intake_ball] = 100;
+			motor[indexer] = 100;
 		}
-		else if(vexRT[Btn6D]){
-			motor[intake_ball] = -100;
+		else if(Btn7R){
+			motor[indexer] = -100;	
+		}
+		else{
+			motor[indexer] = 0;
+		}
+		
+		//if button && !toggle_ball
+		if(vexRT[Btn6D]){
+			toggle_ball = !toggle_ball;
+		}
+		if(toggle_ball){
+			motor[intake_ball] = 127;	
+		}
+		else if(vexRT[Btn7D] && !toggle_ball){
+			motor[intake_ball] = -127;	
 		}
 		else{
 			motor[intake_ball] = 0;
-		}
-
-		if(vexRT[Btn7L]){
-			motor[intake_cap] = -60;
-		}
-		else if(vexRT[Btn7R]){
-			motor[intake_cap] = 60;
-		}
-		else{
-			motor[intake_cap] = 0;
 		}
 	}
 }
