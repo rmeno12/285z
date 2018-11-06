@@ -81,32 +81,29 @@ void red(){
 	int low = 0;
 	int error = 10000;
 	int enc_target = 700;
+	int enc_drive_average = (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
 
-	target = 930; high = 100; low = 50;					//FRONT
-	//target = 1025;	high = 80; low = 30;				//BACK
+	/*/FRONT/*/	target = 930; high = 100; low = 50;
+	/*/BACK/*/	//target = 1025; high = 80; low = 30;
 
 	while(counter < 350)
 	{
 		counter++;
+		
+		if(rpm() < target) {motor[flywheel] = high;}		
+		else if(rpm() > target) {motor[flywheel] = low;}	
 
-		if(rpm() < target) {motor[flywheel] = high;}
-		else if(rpm() > target) {motor[flywheel] = low;}
-		if(rpm() >= target) {motor[intake_ball] = 127;}
+		if(rpm() >= target) {motor[intake_ball] = 127;}		/*/SHOOT THE BALL/*/
 	}
-
-	motor[flywheel] = motor[intake_ball] = 0;
+	motor[flywheel] = motor[intake_ball] = 0;			/*/STOP FLYWHEEL AND BALL INTAKE/*/
 
 	while(error > 0){
-		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
+		error = enc_target - enc_drive_average;
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
-		if(error > 150){
-			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 120;
-		}
-		else{
-			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 60;
-		}
+		if(error > 150) {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 120;}
+			   else {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 60;}
 	}
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
 
@@ -117,32 +114,28 @@ void red(){
 	SensorValue[enc_drive_right] = 0;
 
 	while(error > 0){
-		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
+		error = abs(enc_target - enc_drive_average);
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
-		if(error > 150){
-			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -120;
-		}
-		else{
-			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -60;
-		}
+		if(error > 150) {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -120;}
+			   else {motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -60;}
 	}
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -100;
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -100;	/*/TURN TO FACE PLATFORMS/*/
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 100;
 	wait1Msec(500);
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 10;
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
 
-	error = 10000;
+	error = 10000;							/*/BEGIN DRIVING ON PLATFORMS/*/
 	enc_target = -700;
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
 	while(error > 0){
-		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
+		error = abs(enc_target - enc_drive_average);
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
@@ -163,9 +156,10 @@ void blue(){
 	int low = 0;
 	int error = 10000;
 	int enc_target = 700;
+	int enc_drive_average = (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
 
-	target = 930; high = 100; low = 50;					//FRONT
-	//target = 1025;	high = 80; low = 30;				//BACK
+	/*/FRONT/*/	target = 930; high = 100; low = 50;
+	/*/BACK/*/	//target = 1025; high = 80; low = 30;
 
 	while(counter < 350)
 	{
@@ -173,13 +167,13 @@ void blue(){
 
 		if(rpm() < target) {motor[flywheel] = high;}
 		else if(rpm() > target) {motor[flywheel] = low;}
-		if(rpm() >= target) {motor[intake_ball] = 127;}
+		
+		if(rpm() >= target) {motor[intake_ball] = 127;}		/*/SHOOT THE BALL/*/
 	}
-
 	motor[flywheel] = motor[intake_ball] = 0;
 
 	while(error > 0){
-		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
+		error = enc_target - enc_drive_average;
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
@@ -201,7 +195,7 @@ void blue(){
 	SensorValue[enc_drive_right] = 0;
 
 	while(error > 0){
-		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
+		error = abs(enc_target - enc_drive_average);
 		displayLCDNumber(1, 5, error);
 		writeDebugStreamLine("Error: %d", error);
 
@@ -216,13 +210,13 @@ void blue(){
 	}
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100;
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100;	/*/TURN TO FACE THE PLATFORMS/*/
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -100;
 	wait1Msec(500);
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -10;
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 
-	error = 10000;
+	error = 10000;							/*/BEGIN DRIVING ON PLATFORMS/*/
 	enc_target = -700;
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
@@ -247,32 +241,30 @@ void blue(){
 task autonomous()
 {
 	bool is_red = false;
-	if(is_red){
-		red();
-	}
-	else{
-		blue();
-	}
+	if(is_red)	{red();}
+	else(!is_red)	{blue();}
 
 }
-/*
-motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;	//RED
-//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 65;		//BLUE
-wait1Msec(1500);
-motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//RED
-//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -27; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//BLUE
-wait1Msec(500);
-motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -10;
-motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
 
-motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;
-wait1Msec(1500);
-motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -127;
-motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;
-wait1Msec(1000);
-motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;
-wait1Msec(3000);
-*/
+//THE FOLLOWING IS IN MEMORY OF OUR OLD SUPER JANK AND CHOPPY AUTON THAT WAS BASED ON TIME...RIP AUTOJANK//
+/****************************************************************************************************************************************/
+/*motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//RED	*/
+/*//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 65;		//BLUE	*/
+/*wait1Msec(1500);															*/
+/*motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;		//RED	*/
+/*//motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -27; motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;	//BLUE	*/
+/*wait1Msec(500);															*/
+/*motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -10;										*/
+/*motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;										*/
+/*																	*/
+/*motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;			*/
+/*wait1Msec(1500);															*/
+/*motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -127;	//THIS SHOULD BE NEGATIVE WHEN RED					*/
+/*motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 127;	//THIS SHOULD BE NEGATIVE WHEN BLUE					*/
+/*wait1Msec(1000);															*/
+/*motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -127;			*/
+/*wait1Msec(3000);															*/
+/****************************************************************************************************************************************/
 
 
 
