@@ -263,6 +263,7 @@ void row_blue()
 	startTask(aut_bang);
 	motor[intake_ball] = 127;
 
+	//move backwards to grab ball
 	while(error > 0){
 		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
 		displayLCDNumber(1, 5, error);
@@ -286,6 +287,7 @@ void row_blue()
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
+	//move forwards to start tile
 	while(error > 0){
 		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
 		displayLCDNumber(1, 5, error);
@@ -309,7 +311,8 @@ void row_blue()
 
 	wait1Msec(200);
 
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -60;	/*/TURN TO FACE PLATFORMS/*/
+	//turn to aim at flag
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -60;
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 60;
 	wait1Msec(570);
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 10;
@@ -321,6 +324,7 @@ void row_blue()
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
+	//move back a bit
 	while(error > 0){
 		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
 		displayLCDNumber(1, 5, error);
@@ -332,6 +336,7 @@ void row_blue()
 
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 
+	//shoot ball at high flag
 	motor[indexer] = 127;
 	wait1Msec(300);
 	motor[indexer] = 0;
@@ -343,6 +348,7 @@ void row_blue()
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
+	//move toward flags
 	while(error > 0){
 		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
 		displayLCDNumber(1, 5, error);
@@ -363,6 +369,7 @@ void row_blue()
 	}
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
 
+	//shoot ball at low flag
 	motor[indexer] = motor[intake_ball] = 127;
 	wait1Msec(600);
 	motor[indexer] = motor[intake_ball] = 0;
@@ -372,6 +379,7 @@ void row_blue()
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
+	//move to hit low flag
 	while(error > 0){
 		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
 		displayLCDNumber(1, 5, error);
@@ -393,6 +401,7 @@ void row_blue()
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
 
 }
+
 
 task autonomous()
 {
@@ -452,19 +461,6 @@ const unsigned int TrueSpeed[128] =
 	88, 89, 89, 90, 90, 127, 127, 127
 };
 
-/*float jarize(int speed_raw)
-{
-float	speed_temp;
-
-if(speed_raw >= 0)
-{speed_temp = (speed_raw * speed_raw) / 127;}
-else
-{speed_temp = (speed_raw * speed_raw) / -127;}
-
-if(speed_temp <= 122) {speed_temp = speed_temp +5;
-
-return floor(speed_temp);
-}*/
 
 task usercontrol()
 {
