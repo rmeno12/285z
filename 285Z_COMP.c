@@ -74,6 +74,17 @@ float rpm(){
 	return rpm;
 }
 
+task aut_bang(){
+	int high = 120;
+	int low = 70;
+	int target = 930;
+	while(true){
+		if(rpm() < target) {motor[flywheel] = high;}
+		else if(rpm() > target) {motor[flywheel] = low;}
+	}
+}
+
+
 void red(){
 	int counter = 0;
 	int target = 0;
@@ -81,19 +92,19 @@ void red(){
 	int low = 0;
 	int error = 10000;
 	int enc_target = 700;
-	
+
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
-	
+
 	/*/FRONT/*/	target = 930; high = 100; low = 50;
 	/*/BACK/*/	//target = 1025; high = 80; low = 30;
 
-	while(counter < 350)
+	while(counter < 300)
 	{
 		counter++;
 
-		if(rpm() < target) {motor[flywheel] = high;}		
-		else if(rpm() > target) {motor[flywheel] = low;}	
+		if(rpm() < target) {motor[flywheel] = high;}
+		else if(rpm() > target) {motor[flywheel] = low;}
 
 		if(rpm() >= target) {motor[intake_ball] = motor[indexer] = 127;}		/*/SHOOT THE BALL/*/
 	}
@@ -111,7 +122,7 @@ void red(){
 
 	wait1Msec(300);
 	error = 10000;
-	enc_target = -970;
+	enc_target = -910;
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
@@ -127,7 +138,7 @@ void red(){
 
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -100;	/*/TURN TO FACE PLATFORMS/*/
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 100;
-	wait1Msec(450);
+	wait1Msec(390);
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 10;
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
 
@@ -158,14 +169,14 @@ void blue(){
 	int low = 0;
 	int error = 10000;
 	int enc_target = 700;
-	
+
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
-	/*/FRONT/*/	target = 930; high = 120; low = 50;
+	/*/FRONT/*/	target = 930; high = 100; low = 50;
 	/*/BACK/*/	//target = 1025; high = 80; low = 30;
 
-	while(counter < 350)
+	while(counter < 300)
 	{
 		counter++;
 
@@ -194,7 +205,7 @@ void blue(){
 
 	wait1Msec(300);
 	error = 10000;
-	enc_target = -970;
+	enc_target = -910;
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
@@ -216,7 +227,7 @@ void blue(){
 
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100;	/*/TURN TO FACE THE PLATFORMS/*/
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -100;
-	wait1Msec(400);
+	wait1Msec(460);
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -10;
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 
@@ -242,12 +253,154 @@ void blue(){
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 }
 
+void row_blue()
+{
+	int error = 10000;
+	int enc_target = -550;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	startTask(aut_bang);
+	motor[intake_ball] = 127;
+
+	while(error > 0){
+		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -120;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -70;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -60;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -40;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
+
+	wait1Msec(300);
+
+	error = 10000;
+	enc_target = 560;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	while(error > 0){
+		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 120;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 70;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 60;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 40;
+		}
+
+		if(error < 400){
+			motor[intake_ball] = 0;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
+
+
+	wait1Msec(200);
+
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -60;	/*/TURN TO FACE PLATFORMS/*/
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 60;
+	wait1Msec(570);
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 10;
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
+
+	wait1Msec(500);
+	error = 10000;
+	enc_target = -120;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	while(error > 0){
+		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -40;
+		motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -45;
+	}
+
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
+
+	motor[indexer] = 127;
+	wait1Msec(300);
+	motor[indexer] = 0;
+
+	wait1Msec(200);
+
+	error = 10000;
+	enc_target = 470;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	while(error > 0){
+		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 120;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 80;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 60;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 45;
+		}
+
+		if(error < 300){
+			motor[intake_ball] = 0;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
+
+	motor[indexer] = motor[intake_ball] = 127;
+	wait1Msec(600);
+	motor[indexer] = motor[intake_ball] = 0;
+	
+	error = 10000;
+	enc_target = 150;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	while(error > 0){
+		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 120;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 80;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 60;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 45;
+		}
+
+		if(error < 300){
+			motor[intake_ball] = 0;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
+
+}
+
 task autonomous()
 {
-	bool is_red = true;
+	row_blue();
+	/*	bool is_red = false;
 	if(is_red)	{red();}
 	else				{blue();}
-
+	*/
 }
 
 //THE FOLLOWING IS IN MEMORY OF OUR OLD SUPER JANK AND CHOPPY AUTON THAT WAS BASED ON TIME...RIP AUTOJANK//
@@ -379,22 +532,22 @@ task usercontrol()
 			motor[indexer] = 100;
 		}
 		else if(vexRT[Btn7R]){
-			motor[indexer] = -100;	
+			motor[indexer] = -100;
 		}
 		else{
 			motor[indexer] = 0;
 		}
-		
+
 		//if button && !toggle_ball
 		if(vexRT[Btn6D]){
 			while(vexRT[Btn6D]){}
 			toggle_ball = !toggle_ball;
 		}
 		if(toggle_ball){
-			motor[intake_ball] = 127;	
+			motor[intake_ball] = 127;
 		}
 		else if(vexRT[Btn7D] && !toggle_ball){
-			motor[intake_ball] = -127;	
+			motor[intake_ball] = -127;
 		}
 		else{
 			motor[intake_ball] = 0;
