@@ -483,6 +483,7 @@ void row_blue()
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 
 	get_platform_pos();
+	motor[flywheel] = 0;
 }
 
 task autonomous()
