@@ -82,36 +82,37 @@ task aut_bang(){
 		if(rpm() < target) {motor[flywheel] = high;}
 		else if(rpm() > target) {motor[flywheel] = low;}
 	}
-	
-void get_rpm_then_shoot(int target, int high, int low, int duration){
-	int curr = 0;
-	
-	while(curr < duration){
-		curr++;
-		
-		if(rpm() < target) {motor[flywheel] = high;}
-		else if(rpm() > target) {motor[flywheel] = low;}
-		
-		if(rpm() >= target) {motor[intake_ball] = motor[indexer] = 127;}
-	}
 }
 
-void red(){
-	//int counter = 0;
-	//int target = 0;
-	//int high = 0;
-	//int low = 0;
-	int error = 10000;
-	int enc_target = 700;
+	void get_rpm_then_shoot(int target, int high, int low, int duration){
+		int curr = 0;
 
-	SensorValue[enc_drive_left] = 0;
-	SensorValue[enc_drive_right] = 0;
+		while(curr < duration){
+			curr++;
 
-	/*/FRONT/*/	target = 930; high = 100; low = 50;
-	/*/BACK/*/	//target = 1025; high = 80; low = 30;
-	/*
-	while(counter < 300)
-	{
+			if(rpm() < target) {motor[flywheel] = high;}
+			else if(rpm() > target) {motor[flywheel] = low;}
+
+			if(rpm() >= target) {motor[intake_ball] = motor[indexer] = 127;}
+		}
+	}
+
+	void red(){
+		int counter = 0;
+		int target = 0;
+		int high = 0;
+		int low = 0;
+		int error = 10000;
+		int enc_target = 700;
+
+		SensorValue[enc_drive_left] = 0;
+		SensorValue[enc_drive_right] = 0;
+
+		/*/FRONT/*/	target = 930; high = 100; low = 50;
+		/*/BACK/*/	//target = 1025; high = 80; low = 30;
+		
+		while(counter < 300)
+		{
 		counter++;
 
 		if(rpm() < target) {motor[flywheel] = high;}
@@ -119,11 +120,10 @@ void red(){
 
 		if(rpm() >= target) {motor[intake_ball] = motor[indexer] = 127;}		/*///SHOOT THE BALL/*/
 	}
-	*/
-	
+
 	get_rpm_then_shoot(930, 120, 70, 300);
 	motor[flywheel] = motor[intake_ball] = motor[indexer] = 0;			/*/STOP FLYWHEEL AND BALL INTAKE/*/
-	
+
 	while(error > 0){
 		error = enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2;
 		displayLCDNumber(1, 5, error);
@@ -269,12 +269,12 @@ void blue(){
 
 void get_ball()
 {
-	
+
 	int error = 10000;
 	int enc_target = -550;
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
-	
+
 	while(error > 0){
 		error = abs(enc_target - (-SensorValue[enc_drive_left] + SensorValue[enc_drive_right]) / 2);
 		displayLCDNumber(1, 5, error);
@@ -447,7 +447,7 @@ void row_blue()
 {
 	startTask(aut_bang);
 	motor[intake_ball] = 127;
-	
+
 	get_ball();
 	wait1Msec(300);
 
@@ -460,7 +460,7 @@ void row_blue()
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 10;
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
 	wait1Msec(500);
-	
+
 	get_high_flag_pos();
 	motor[indexer] = 127;
 	wait1Msec(300);
@@ -474,7 +474,7 @@ void row_blue()
 
 	get_low_flag_pos();
 	wait1Msec(300);
-	
+
 	get_parking_pos();
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 100;	/*/TURN TO FACE THE PLATFORMS/*/
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -100;
@@ -483,7 +483,7 @@ void row_blue()
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 
 	get_platform_pos();
-	}
+}
 
 task autonomous()
 {
