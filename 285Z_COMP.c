@@ -96,7 +96,6 @@ void get_rpm_then_shoot(int target, int high, int low, int duration){
 	}
 }
 
-
 void red(){
 	//int counter = 0;
 	//int target = 0;
