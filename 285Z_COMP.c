@@ -77,42 +77,43 @@ float rpm(){
 task aut_bang(){
 	int high = 120;
 	int low = 70;
-	int target = 930;
+	int target = 850;
+
 	while(true){
 		if(rpm() < target) {motor[flywheel] = high;}
 		else if(rpm() > target) {motor[flywheel] = low;}
 	}
 }
 
-	void get_rpm_then_shoot(int target, int high, int low, int duration){
-		int curr = 0;
+void get_rpm_then_shoot(int target, int high, int low, int duration){
+	int curr = 0;
 
-		while(curr < duration){
-			curr++;
+	while(curr < duration){
+		curr++;
 
-			if(rpm() < target) {motor[flywheel] = high;}
-			else if(rpm() > target) {motor[flywheel] = low;}
+		if(rpm() < target) {motor[flywheel] = high;}
+		else if(rpm() > target) {motor[flywheel] = low;}
 
-			if(rpm() >= target) {motor[intake_ball] = motor[indexer] = 127;}
-		}
+		if(rpm() >= target) {motor[intake_ball] = motor[indexer] = 127;}
 	}
+}
 
-	void red(){
-		int counter = 0;
-		int target = 0;
-		int high = 0;
-		int low = 0;
-		int error = 10000;
-		int enc_target = 700;
+void red(){
+	int counter = 0;
+	int target = 0;
+	int high = 0;
+	int low = 0;
+	int error = 10000;
+	int enc_target = 700;
 
-		SensorValue[enc_drive_left] = 0;
-		SensorValue[enc_drive_right] = 0;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
 
-		/*/FRONT/*/	target = 930; high = 100; low = 50;
-		/*/BACK/*/	//target = 1025; high = 80; low = 30;
-		
-		while(counter < 300)
-		{
+	/*/FRONT/*/	target = 930; high = 100; low = 50;
+	/*/BACK/*/	//target = 1025; high = 80; low = 30;
+
+	while(counter < 300)
+	{
 		counter++;
 
 		if(rpm() < target) {motor[flywheel] = high;}
@@ -187,7 +188,7 @@ void blue(){
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
-	/*/FRONT/*/	target = 930; high = 100; low = 50;
+	/*/FRONT/*/	target = 900; high = 100; low = 50;
 	/*/BACK/*/	//target = 1025; high = 80; low = 30;
 
 	while(counter < 300)
@@ -295,7 +296,7 @@ void get_ball()
 void return_to_init_pos()
 {
 	int error = 10000;
-	int enc_target = 570;
+	int enc_target = 575;
 	SensorValue[enc_drive_left] = 0;
 	SensorValue[enc_drive_right] = 0;
 
@@ -357,7 +358,7 @@ void get_mid_flag_pos()
 		}
 		else{
 			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 60;
-			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 45;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 50;
 		}
 
 		if(error < 300){
@@ -381,11 +382,11 @@ void get_low_flag_pos()
 
 		if(error > 150){
 			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 120;
-			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 80;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 50;
 		}
 		else{
 			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 60;
-			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 45;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 35;
 		}
 
 		if(error < 300){
@@ -409,11 +410,11 @@ void get_parking_pos()
 
 		if(error > 150){
 			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -120;
-			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -70;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -80;
 		}
 		else{
 			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -60;
-			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -40;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -45;
 		}
 	}
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
@@ -443,6 +444,31 @@ void get_platform_pos()
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
 }
 
+void turn_left()
+{
+	int error = 10000;							/*/BEGIN DRIVING ON PLATFORMS/*/
+	int enc_target = 182;
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
+	while(error > 0){
+		error = abs(enc_target - (SensorValue[enc_drive_left]);
+		displayLCDNumber(1, 5, error);
+		writeDebugStreamLine("Error: %d", error);
+
+		if(error > 150){
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -60;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 60;
+		}
+		else{
+			motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -45;
+			motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 45;
+		}
+	}
+	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -10;
+	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 10;
+}
+
 void row_blue()
 {
 	startTask(aut_bang);
@@ -454,12 +480,11 @@ void row_blue()
 	return_to_init_pos();
 	wait1Msec(200);
 
-	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = -60;	/*/TURN TO FACE PLATFORMS/*/
-	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = 60;
-	wait1Msec(570);
+	turn_left();
+	wait1Msec(615);
 	motor[drive_l1] = motor[drive_l2] = motor[drive_l3] = 10;
 	motor[drive_r1] = motor[drive_r2] = motor[drive_r3] = -10;
-	wait1Msec(500);
+	wait1Msec(200);
 
 	get_high_flag_pos();
 	motor[indexer] = 127;
@@ -488,7 +513,7 @@ void row_blue()
 
 task autonomous()
 {
-	row_blue();
+	blue();
 }
 
 //THE FOLLOWING IS IN MEMORY OF OUR OLD SUPER JANK AND CHOPPY AUTON THAT WAS BASED ON TIME...RIP AUTOJANK//
@@ -550,8 +575,14 @@ task usercontrol()
 
 	bool toggle_ball = false;
 
+	SensorValue[enc_drive_left] = 0;
+	SensorValue[enc_drive_right] = 0;
+
 	while (true)
-	{
+	{	
+		clearLCDLine(1);
+		displayLCDNumber(1, 2, SensorValue[enc_drive_left]);
+		displayLCDNumber(1, 8, SensorValue[enc_drive_right]);
 		if(vexRT[Ch2] <= 0)
 		{
 			speed_drive_R = -TrueSpeed[abs(vexRT[Ch2])];
