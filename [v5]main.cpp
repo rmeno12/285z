@@ -1,4 +1,9 @@
 #include "robot-config.h"
+#include <iostream>
+#include <vector>
+using namespace std;
+    
+    
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*        Description: Competition template for VCS VEX V5                    */
@@ -33,14 +38,14 @@ void pre_auton( void ) {
 /*                                                                           */
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
-double rev_left = 0;
-double rev_right = 0;
+double rev_left {0};
+double rev_right {0};
 
 double rpm() 
 {
-    double rots =  flywheel.velocity(vex::velocityUnits::rpm)*25;
+    double rotations {flywheel.velocity(vex::velocityUnits::rpm)*25};
  
-    return rots;
+    return rotations;
 }
 
 void driveLeft(double power)
@@ -53,7 +58,7 @@ double getLeft()
 {
     rev_left = (drive_l1.rotation(vex::rotationUnits::rev) + drive_l2.rotation(vex::rotationUnits::rev)) / 2;
 
-    double revolutions = rev_left;
+    double revolutions {rev_left};
     
     return revolutions;
 }
@@ -68,7 +73,7 @@ double getRight()
 {
     rev_right = (drive_r1.rotation(vex::rotationUnits::rev) + drive_r2.rotation(vex::rotationUnits::rev)) / 2;
     
-    double revolutions = rev_right;
+    double revolutions {rev_right};
     
     return revolutions;
 }
@@ -110,8 +115,8 @@ void get_rpm_then_shoot(int target, int duration){
 /////////////////////////////////
 void red()
 {
-    int error = 10000;
-    int target = 1234;          // Go Forward //
+    int error {10000};
+    int target {1234};          // Go Forward //
     rev_left = rev_right = 0;
         
     get_rpm_then_shoot(900, 300);
@@ -187,8 +192,8 @@ void red()
 //////////////////////////////////
 void blue()
 {
-    int error = 10000;
-    int target = 1234;          // Go Forward //
+    int error {10000};
+    int target {1234};          // Go Forward //
     rev_left = rev_right = 0;
     
     get_rpm_then_shoot(900, 300);
@@ -281,15 +286,109 @@ void autonomous( void )
 
 void usercontrol( void ) 
 {
-    flywheelPower(900);
+    int target {900};
     
     bool toggle_ballIntake = false;
     rev_left = rev_right = 0;
             
-    while (true) {
-    
-    vex::task::sleep(20); //Sleep the task for a short amount of time to prevent wasted resources. 
-  }
+    while (true) 
+    {
+//++++++++++++ Tank Drive Control Setup ++++++++++++//
+        
+// Left Drive Setup //
+        drive_l1.spin(vex::directionType::fwd, controller.Axis3.value(), vex::velocityUnits::pct);
+        drive_l2.spin(vex::directionType::fwd, controller.Axis3.value(), vex::velocityUnits::pct);
+        
+// Right Drive Setup //
+        drive_r1.spin(vex::directionType::fwd, controller.Axis2.value(), vex::velocityUnits::pct);
+        drive_r2.spin(vex::directionType::fwd, controller.Axis2.value(), vex::velocityUnits::pct);
+
+        
+//++++++++++++ Flywheel Control Setup ++++++++++++//      
+        if(rpm() != target)
+        {
+            flywheelPower(target/25);
+        }
+        
+// High RPM //
+        if(controller.ButtonY.pressing())
+        {
+            flywheel.spin(vex::directionType::fwd, 900, vex::velocityUnits::rpm);
+        }
+        
+// Low RPM //
+        else if(controller.ButtonB.pressing())
+        {
+            flywheel.spin(vex::directionType::fwd, 450, vex::velocityUnits::rpm);
+        }
+
+        
+//++++++++++++ Ball Intake & Indexer Control Setup ++++++++++++//
+        
+// Ball Intake Setup //
+        // Toggle Setup //
+        if(!controller.ButtonR2.pressing() && !ball_intake.isSpinning())
+        {
+            ball_intake.spin(vex::directionType::fwd, 0, vex::velocityUnits::pct);
+        }
+        else if(controller.ButtonR2.pressing() && !ball_intake.isSpinning())
+        {
+            ball_intake.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+        }
+        else if(!controller.ButtonR2.pressing() && ball_intake.isSpinning())
+        {
+            ball_intake.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+        }
+        else if(controller.ButtonR2.pressing() && ball_intake.isSpinning())
+        {
+            ball_intake.spin(vex::directionType::fwd, 0, vex::velocityUnits::pct);
+        }
+        // Reverse Setup //
+        if(!controller.ButtonDown.pressing() && !ball_intake.isSpinning())
+        {
+            // This Should Do Nothing //
+        }
+        else if(controller.ButtonDown.pressing() && !ball_intake.isSpinning())
+        {
+            // This Should Do Nothing //
+        }
+        else if(!controller.ButtonDown.pressing() && ball_intake.isSpinning())
+        {
+            // This Should Do Nothing //
+        }
+        else if(controller.ButtonDown.pressing() && ball_intake.isSpinning())
+        {
+            ball_intake.spin(vex::directionType::rev, 100, vex::velocityUnits::pct);
+        }
+        
+// Ball Indexer Setup //
+        // Forward Setup //
+        if(controller.ButtonR1.pressing())
+        {
+            ball_indexer.spin(vex::directionType::fwd, 100, vex::velocityUnits::pct);
+        }
+        else
+        {
+            ball_indexer.spin(vex::directionType::fwd, 0, vex::velocityUnits::pct);
+        }
+        // Reverse Setup //
+        if(controller.ButtonRight.pressing() && controller.ButtonR1.pressing())
+        {
+            ball_indexer.spin(vex::directionType::rev, 100, vex::velocityUnits::pct);
+        }
+        else if(controller.ButtonRight.pressing() && !controller.ButtonR1.pressing())
+        {
+            ball_indexer.spin(vex::directionType::rev, 100, vex::velocityUnits::pct);
+        }
+        else if(!controller.ButtonRight.pressing())
+        {
+            // This Should Do Nothing //
+        }
+
+//++++++++++++ The Might 'L' Setup ++++++++++++//
+
+        vex::task::sleep(20); //Sleep the task for a short amount of time to prevent wasted resources. 
+    }
 }
 
 /*/!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!/*/
@@ -305,5 +404,8 @@ int main()
     Competition.autonomous( autonomous );
     Competition.drivercontrol( usercontrol );
 
-    while(true) {vex::task::sleep(100);}
+    while(true) 
+    {
+        //vex::task::sleep(100);
+    }
 }
