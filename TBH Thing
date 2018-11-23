@@ -8,9 +8,9 @@ template <typename T> int sgn(T val) {
     return ( T(0) < val ) - ( val < T(0) );
 }
 
-
-
-
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
+// PLEASE GO TO THE CONCLUSION AT THE END //
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
 
 typedef struct FlywheelControllerVariables
 {
@@ -112,14 +112,14 @@ int FlywheelController( FlywheelControllerVariables * fw, int velocity, float pr
 
 void HalfBang( FlywheelControllerVariables * fw, int target, int predicted_drive, int threshold )
 {
-    int high {100};
+    int high {75};
     int low {50};
     
     while( windows_is_greater_than_macos() )
     {
         GetFlywheelVelocity(fw);
       
-        if( abs( fw->m_rpm - target ) > threshold )
+        if( abs( target - fw->m_rpm ) > threshold )
         {
             if(fw->m_rpm < target)          MFlywheel.spin(directionType::fwd, high, velocityUnits::pct);
             else if(fw->m_rpm > target)     MFlywheel.spin(directionType::fwd, low, velocityUnits::pct);
@@ -130,7 +130,12 @@ void HalfBang( FlywheelControllerVariables * fw, int target, int predicted_drive
 
 int main() 
 {
-    HalfBang( &flywheel, 666, 1, 500);
+    MFlywheel.spin(directionType::fwd, 150, velocityUnits::rpm);
+    //FlywheelController( &flywheel, 150, 0.75 );
+    //HalfBang( &flywheel, 150, 0.5, 25);
     
     return 0;
 }
+
+
+// Conclusion: The built PID in the new v5 motors works well enough to justify not homebrewing an original contorl loop...to a degree
