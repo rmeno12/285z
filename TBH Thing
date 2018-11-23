@@ -25,6 +25,7 @@ typedef struct FlywheelControllerVariables
     
     long first_cross {1};
 } FlywheelControllerVariables;
+static FlywheelControllerVariables flywheel;
 
 void GetFlywheelVelocity(FlywheelControllerVariables * fw)
 {
@@ -67,8 +68,20 @@ void FlywheelControllerUpdater(FlywheelControllerVariables * fw)
     fw->l_error = fw->c_error;
 }
 
-void FlywheelController(FlywheelControllerVariables * fw)
+int FlywheelController( FlywheelControllerVariables * fw, int velocity, float predicted_drive )
 {
+    fw->t_rpm = velocity;
+    
+    fw->c_error = fw->t_rpm - fw->m_rpm;
+    fw->l_error = fw->c_error;
+    
+    fw->drive_approx = predicted_drive;
+    
+    fw->first_cross = 1;
+    fw->drive_at_zero = 0;
+    
+    
+    
     fw->gain = 0.00025;
     
     // this loop calculates motor speed and determines what control value needs to be sent to the motor
@@ -88,26 +101,13 @@ void FlywheelController(FlywheelControllerVariables * fw)
         
         task::sleep(25);
     }
-}
-
-// The best guess speed is part of the TBH algorithm tuning, we determine this by seeing how our motor (flywheel) stabilizes after a few seconds have passed
-void SetFlywheelVelocity( FlywheelControllerVariables *fw, int velocity, float predicted_drive )
-{
-    fw->t_rpm = velocity;
     
-    fw->c_error = fw->t_rpm - fw->m_rpm;
-    fw->l_error = fw->c_error;
-    
-    fw->drive_approx = predicted_drive;
-    
-    fw->first_cross = 1;
-    fw->drive_at_zero = 0;
+    return 0;
 }
 
 int main() 
 {
-    // this wont compile // I don't know how to use take in vex
-    task::task ( FlywheelController(fw) );
+    FlywheelController( &flywheel, 666, 100 );
     
-    SetFlywheelVelocity( 666, 100 );
+    return 0;
 }
