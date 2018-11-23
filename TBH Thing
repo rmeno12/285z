@@ -105,9 +105,29 @@ int FlywheelController( FlywheelControllerVariables * fw, int velocity, float pr
     return 0;
 }
 
+void HalfBang( FlywheelControllerVariables * fw, int target, int predicted_drive, int threshold )
+{
+    int high {100};
+    int low {50};
+    
+    while(true)
+    {
+        GetFlywheelVelocity(fw);
+      
+        if( abs( fw->m_rpm - target ) > threshold )
+        {
+            if(fw->m_rpm < target)          MFlywheel.spin(directionType::fwd, high, velocityUnits::pct);
+            else if(fw->m_rpm > target)     MFlywheel.spin(directionType::fwd, low, velocityUnits::pct);
+        }
+        else FlywheelController( &flywheel, target, predicted_drive );
+    }
+}
+
 int main() 
 {
-    FlywheelController( &flywheel, 666, 100 );
+    
+    //FlywheelController( &flywheel, 666, 1 );
+    HalfBang( &flywheel, 666, 1, 500);
     
     return 0;
 }
