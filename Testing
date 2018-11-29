@@ -1,19 +1,33 @@
-#include "robot-config.h"
-/*
-using namespace vex;
-brain Brain;
-controller joystick = controller();
+#include "robot-config.h"   //< Code for this is after the main function
+#define current_rpm mFlywheel.velocity(velocityUnits::rpm)
 
-motor mDrive_l1 = motor(PORT1);
-motor mDrive_l2 = motor(PORT2);
-motor mDrive_r1 = motor(PORT3);
-motor mDrive_r2 = motor(PORT4);
+// Note: voltage passed to the motor ranges from -12 V to +12 V //
+void pdPID(int target) {
+    double power {0};
+    double error {target - current_rpm};
+    double last_error {0};
     
-motor mFlywheel = motor(PORT5);
-
-motor mIntake = motor(PORT6);
-motor mIndexer = motor(PORT7);
-*/
+    double kp {0};
+    double kd {0};
+    double ki {0};
+    
+    while(fabs(error) > 5){
+        error = current_rpm;
+        double calc_P {kp * error};
+        double calc_D {kd * (error - last_error)};
+        double calc_I {0};
+        
+        if(error < 20){
+            calc_I = ki * (error + last_error);
+        }
+        
+        power = calc_P + calc_D + calc_I;
+        
+        mFlywheel.spin(directionType::fwd, power, voltageUnits::volt);   //yea this really needs to be checked before we run so we don't trash smth
+        
+        this_thread::sleep_for(10);
+    }
+}
 
 static bool reverse {false};
 static bool toggle {false};
@@ -51,7 +65,7 @@ void rIndexer()
 
 
 
-void nlDrive_lTank()
+void nlDrive_Tank_l()
 {
     int speed {joystick.Axis3.value()};
     if (abs(speed) < 5)
@@ -67,7 +81,7 @@ void nlDrive_lTank()
     mDrive_l1.spin(directionType::fwd, speed, velocityUnits::pct);
     mDrive_l2.spin(directionType::fwd, speed, velocityUnits::pct);
 }
-void nlDrive_rTank()
+void nlDrive_Tank_r()
 {
     int speed {joystick.Axis2.value()};
     if (abs(speed) < 5)
@@ -84,7 +98,7 @@ void nlDrive_rTank()
     mDrive_r2.spin(directionType::fwd, speed, velocityUnits::pct);
 }
 
-void nlDrive_lArcade()
+void nlDrive_Arcade_l()
 {
     int speed {( joystick.Axis3.value() + joystick.Axis4.value() ) / 2};
     if (abs(speed) < 5)
@@ -100,7 +114,7 @@ void nlDrive_lArcade()
     mDrive_l1.spin(directionType::fwd, speed, velocityUnits::pct);
     mDrive_l2.spin(directionType::fwd, speed, velocityUnits::pct);
 }
-void nlDrive_rArcade()
+void nlDrive_Arcade_r()
 {
     int speed {( joystick.Axis3.value() - joystick.Axis4.value() ) / 2};
     if (abs(speed) < 5)
@@ -117,7 +131,7 @@ void nlDrive_rArcade()
     mDrive_r2.spin(directionType::fwd, speed, velocityUnits::pct);
 }
 
-void nlDrive_lSplitArcade()
+void nlDrive_SplitArcade_l()
 {
     int speed {( joystick.Axis3.value() + joystick.Axis1.value() ) / 2};
     if (abs(speed) < 5)
@@ -133,7 +147,7 @@ void nlDrive_lSplitArcade()
     mDrive_l1.spin(directionType::fwd, speed, velocityUnits::pct);
     mDrive_l2.spin(directionType::fwd, speed, velocityUnits::pct);
 }
-void nlDrive_rSplitArcade()
+void nlDrive_SplitArcade_r()
 {
     int speed {( joystick.Axis3.value() - joystick.Axis1.value() ) / 2};
     if (abs(speed) < 5)
@@ -154,18 +168,18 @@ void controlSwitch()
 {
          if (mode == 1)
     {
-        joystick.Axis3.changed(nlDrive_lTank);
-        joystick.Axis2.changed(nlDrive_rTank);
+        joystick.Axis3.changed(nlDrive_Tank_l);
+        joystick.Axis2.changed(nlDrive_Tank_r);
     }
     else if (mode == 2)
     {
-        joystick.Axis3.changed(nlDrive_lArcade);
-        joystick.Axis2.changed(nlDrive_rArcade);
+        joystick.Axis3.changed(nlDrive_Arcade_l);
+        joystick.Axis2.changed(nlDrive_Arcade_r);
     }
     else if (mode == 3)
     {
-        joystick.Axis3.changed(nlDrive_lSplitArcade);
-        joystick.Axis2.changed(nlDrive_rSplitArcade);
+        joystick.Axis3.changed(nlDrive_SplitArcade_l);
+        joystick.Axis2.changed(nlDrive_SplitArcade_r);
     }
     
     if (mode >= 4)
@@ -176,17 +190,46 @@ void controlSwitch()
 
 void pFlywheel()
 {
+    int target {170};
+    
     int lamp {( sLight_top.value(analogUnits::pct) + sLight_bottom.value(analogUnits::pct) ) / 2};
-    if (60 <= lamp <= 70)           //> will probiblly need to callibrate
+    if (60 <= lamp && lamp <= 70)           //> will probiblly need to callibrate
         mFlywheel.spin(directionType::fwd, 170, velocityUnits::rpm);
     else
-        mFlywheel.stop();
+        //mFlywheel.stop();
+        mFlywheel.spin(directionType::fwd, 50, velocityUnits::rpm);
+    
+    if(current_rpm < (target-10))
+    {
+            pdPID(target-20);
+            mFlywheel.spin(directionType::fwd, target-20, velocityUnits::rpm);
+            this_thread::sleep_for(1000);            
+    }
 }
 
 
 
 int main()
 {
+    while( 0==0 )
+    {
+    Brain.Screen.clearScreen();
+        
+    Brain.Screen.print(mDrive_l1.temperature(percentUnits::pct));
+        Brain.Screen.newLine();
+    Brain.Screen.print(mDrive_l2.temperature(percentUnits::pct));
+        Brain.Screen.newLine();
+    Brain.Screen.print(mDrive_r1.temperature(percentUnits::pct));
+        Brain.Screen.newLine();
+    Brain.Screen.print(mDrive_r2.temperature(percentUnits::pct));
+        Brain.Screen.newLine();
+
+    Brain.Screen.print(mIntake.temperature(percentUnits::pct));
+        Brain.Screen.newLine();
+    Brain.Screen.print(mIndexer.temperature(percentUnits::pct));
+        Brain.Screen.newLine(); 
+    }
+                          
 /************** Flywheel Controller **************/
     
     sLight_top.changed(pFlywheel);
@@ -195,16 +238,7 @@ int main()
 /***************** Drive Control *****************/
     
     joystick.ButtonL1.pressed(controlSwitch);
-    
-    //joystick.Axis3.changed(nlDrive_lTank);
-    //joystick.Axis2.changed(nlDrive_rTank);
- 
-    //joystick.Axis3.changed(nlDrive_lArcade);
-    //joystick.Axis2.changed(nlDrive_rArcade);
-    
-    //joystick.Axis3.changed(nlDrive_lSplitArcade);
-    //joystick.Axis2.changed(nlDrive_rSplitArcade);
-    
+       
 /************* Ball Intake & Indexer *************/
     
     joystick.ButtonR1.pressed(puIndexer);   //> indexer 
@@ -220,3 +254,57 @@ int main()
     joystick.ButtonL2.released(pdIndexer);
 
 }
+
+
+
+
+
+/*
+using namespace vex;
+
+class motor_special : public motor {
+    private:
+      uint32_t  _local_index;
+
+    public:
+      motor_special( int32_t index ) :  motor( index ), _local_index(index) {};  
+      ~motor_special() {};
+
+      // Allow overloading of base class methods
+      using motor::spin;
+      
+      // This is similar, not quite the same, as new a method in the next (Nov ?) SDK release
+      // voltage can be +/-12.0 volta or +/-12000 mV
+      void spin( directionType dir, double voltage, voltageUnits units ) {
+        // convert volts to mV is necessary
+        int32_t voltage_mv = (units == voltageUnits::volt ? voltage * 1000.0 : voltage );
+
+        // flip based on direction flag
+        voltage_mv = (dir == directionType::fwd ? voltage_mv : -(voltage_mv) );
+
+        if( voltage_mv == 0 ) {
+          stop();
+        } else {
+          // send mV value to control motor open loop
+          vexMotorVoltageSet( _local_index, voltage_mv );
+        }
+      }
+  };
+
+
+
+brain Brain;
+controller joystick = controller();
+
+motor mDrive_l1 = motor(PORT1);
+motor mDrive_l2 = motor(PORT2);
+motor mDrive_r1 = motor(PORT3);
+motor mDrive_r2 = motor(PORT4);
+    
+motor_special mFlywheel(PORT5);
+light sLight_top = light(Brain.ThreeWirePort.A);
+light sLight_bottom = light(Brain.ThreeWirePort.B);
+
+motor mIntake = motor(PORT6);
+motor mIndexer = motor(PORT7);
+*/
