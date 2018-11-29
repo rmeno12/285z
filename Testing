@@ -53,7 +53,7 @@ void rIndexer()
 
 void nlDrive_lTank()
 {
-    int speed = joystick.Axis3.value();
+    int speed {joystick.Axis3.value()};
     if (abs(speed) < 5)
         speed = 0;
     else
@@ -69,7 +69,7 @@ void nlDrive_lTank()
 }
 void nlDrive_rTank()
 {
-    int speed = joystick.Axis2.value();
+    int speed {joystick.Axis2.value()};
     if (abs(speed) < 5)
         speed = 0;
     else
@@ -86,7 +86,7 @@ void nlDrive_rTank()
 
 void nlDrive_lArcade()
 {
-    int speed = ( joystick.Axis3.value() + joystick.Axis4.value() ) / 2;
+    int speed {( joystick.Axis3.value() + joystick.Axis4.value() ) / 2};
     if (abs(speed) < 5)
         speed = 0;
     else
@@ -102,7 +102,7 @@ void nlDrive_lArcade()
 }
 void nlDrive_rArcade()
 {
-    int speed = ( joystick.Axis3.value() - joystick.Axis4.value() ) / 2;
+    int speed {( joystick.Axis3.value() - joystick.Axis4.value() ) / 2};
     if (abs(speed) < 5)
         speed = 0;
     else
@@ -119,7 +119,7 @@ void nlDrive_rArcade()
 
 void nlDrive_lSplitArcade()
 {
-    int speed = ( joystick.Axis3.value() + joystick.Axis1.value() ) / 2;
+    int speed {( joystick.Axis3.value() + joystick.Axis1.value() ) / 2};
     if (abs(speed) < 5)
         speed = 0;
     else
@@ -135,7 +135,7 @@ void nlDrive_lSplitArcade()
 }
 void nlDrive_rSplitArcade()
 {
-    int speed = ( joystick.Axis3.value() - joystick.Axis1.value() ) / 2;
+    int speed {( joystick.Axis3.value() - joystick.Axis1.value() ) / 2};
     if (abs(speed) < 5)
         speed = 0;
     else
@@ -174,8 +174,24 @@ void controlSwitch()
 
 
 
+void pFlywheel()
+{
+    int lamp {( sLight_top.value(analogUnits::pct) + sLight_bottom.value(analogUnits::pct) ) / 2};
+    if (60 <= lamp <= 70)           //> will probiblly need to callibrate
+        mFlywheel.spin(directionType::fwd, 170, velocityUnits::rpm);
+    else
+        mFlywheel.stop();
+}
+
+
+
 int main()
 {
+/************** Flywheel Controller **************/
+    
+    sLight_top.changed(pFlywheel);
+    sLight_bottom.changed(pFlywheel);
+    
 /***************** Drive Control *****************/
     
     joystick.ButtonL1.pressed(controlSwitch);
