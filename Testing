@@ -1,0 +1,141 @@
+#include "robot-config.h"
+/*
+using namespace vex;
+brain Brain;
+controller joystick = controller();
+
+motor mDrive_l1 = motor(PORT1);
+motor mDrive_l2 = motor(PORT2);
+motor mDrive_r1 = motor(PORT3);
+motor mDrive_r2 = motor(PORT4);
+    
+motor mFlywheel = motor(PORT5);
+
+motor mIntake = motor(PORT6);
+motor mIndexer = motor(PORT7);
+*/
+
+static bool reverse {false};
+bool toggle {false};
+
+void Toggle()
+{
+    toggle = !toggle;
+
+    if (toggle)
+        mIntake.spin(directionType::fwd, 100, velocityUnits::pct);
+    else
+        mIntake.spin(directionType::fwd, 0, velocityUnits::pct);
+}
+
+void puIntake()
+    {mIntake.spin(directionType::fwd, 100, velocityUnits::pct);}
+void pdIntake()
+{
+    mIntake.spin(directionType::fwd, 0, velocityUnits::pct);
+    reverse = false;
+}
+void rIntake()
+{
+    mIntake.spin(directionType::fwd, -100, velocityUnits::pct);
+    reverse = true;
+}
+
+void puIndexer()
+    {mIndexer.spin(directionType::fwd, 100, velocityUnits::pct);}
+void pdIndexer()
+    {mIndexer.spin(directionType::fwd, 0, velocityUnits::pct);}
+void rIndexer()
+    {mIndexer.spin(directionType::fwd, -100, velocityUnits::pct);}
+
+void nlDrive_lTank()
+{
+    int speed = joystick.Axis3.value();
+    if (abs(speed) < 5)
+        speed = 0;
+    else
+        speed = ( (speed^2/100) * speed ) / 100;
+    
+    if (joystick.Axis3.value() < 0)
+        speed = speed * -1;
+    else
+        speed = speed *  1;
+    
+    mDrive_l1.spin(directionType::fwd, speed, velocityUnits::pct);
+    mDrive_l2.spin(directionType::fwd, speed, velocityUnits::pct);
+}
+void nlDrive_rTank()
+{
+    int speed = joystick.Axis2.value();
+    if (abs(speed) < 5)
+        speed = 0;
+    else
+        speed = ( (speed^2/100) * speed ) / 100;
+    
+    if (joystick.Axis2.value() < 0)
+        speed = speed * -1;
+    else
+        speed = speed *  1;
+    
+    mDrive_r1.spin(directionType::fwd, speed, velocityUnits::pct);
+    mDrive_r2.spin(directionType::fwd, speed, velocityUnits::pct);
+}
+
+void nlDrive_lArcade()
+{
+    int speed = ( joystick.Axis3.value() + joystick.Axis4.value() ) / 2;
+    if (abs(speed) < 5)
+        speed = 0;
+    else
+        speed = ( (speed^2/100) * speed ) / 100;
+    
+    if ((( joystick.Axis3.value() + joystick.Axis4.value() ) / 2) < 0)
+        speed = speed * -1;
+    else
+        speed = speed *  1;
+    
+    mDrive_l1.spin(directionType::fwd, speed, velocityUnits::pct);
+    mDrive_l2.spin(directionType::fwd, speed, velocityUnits::pct);
+}
+void nlDrive_rArcade()
+{
+    int speed = ( joystick.Axis3.value() - joystick.Axis4.value() ) / 2;
+    if (abs(speed) < 5)
+        speed = 0;
+    else
+        speed = ( (speed^2/100) * speed ) / 100;
+    
+    if ((( joystick.Axis3.value() - joystick.Axis4.value() ) / 2) < 0)
+        speed = speed * -1;
+    else
+        speed = speed *  1;
+    
+    mDrive_r1.spin(directionType::fwd, speed, velocityUnits::pct);
+    mDrive_r2.spin(directionType::fwd, speed, velocityUnits::pct);
+}
+
+int main()
+{
+/***************** Drive Control *****************/
+    
+    joystick.Axis3.changed(nlDrive_lTank);
+    joystick.Axis2.changed(nlDrive_rTank);
+ 
+    joystick.Axis3.changed(nlDrive_lArcade);
+    joystick.Axis2.changed(nlDrive_rArcade);
+    
+/************* Ball Intake & Indexer *************/
+    
+    joystick.ButtonR1.pressed(puIndexer);   //> indexer 
+    joystick.ButtonR1.released(pdIndexer);
+
+    joystick.ButtonR2.pressed(Toggle);      //> intake toggle
+
+   
+    joystick.ButtonL2.pressed(rIntake);     //> reverse
+    joystick.ButtonL2.pressed(rIndexer);
+
+    joystick.ButtonL2.released(pdIntake);
+    joystick.ButtonL2.released(pdIndexer);
+
+}
