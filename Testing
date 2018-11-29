@@ -16,7 +16,8 @@ motor mIndexer = motor(PORT7);
 */
 
 static bool reverse {false};
-bool toggle {false};
+static bool toggle {false};
+static int mode {1}; 
 
 void Toggle()
 {
@@ -47,6 +48,8 @@ void pdIndexer()
     {mIndexer.spin(directionType::fwd, 0, velocityUnits::pct);}
 void rIndexer()
     {mIndexer.spin(directionType::fwd, -100, velocityUnits::pct);}
+
+
 
 void nlDrive_lTank()
 {
@@ -147,12 +150,38 @@ void nlDrive_rSplitArcade()
     mDrive_r2.spin(directionType::fwd, speed, velocityUnits::pct);
 }
 
+void controlSwitch()
+{
+         if (mode == 1)
+    {
+        joystick.Axis3.changed(nlDrive_lTank);
+        joystick.Axis2.changed(nlDrive_rTank);
+    }
+    else if (mode == 2)
+    {
+        joystick.Axis3.changed(nlDrive_lArcade);
+        joystick.Axis2.changed(nlDrive_rArcade);
+    }
+    else if (mode == 3)
+    {
+        joystick.Axis3.changed(nlDrive_lSplitArcade);
+        joystick.Axis2.changed(nlDrive_rSplitArcade);
+    }
+    
+    if (mode >= 4)
+        mode = 1;
+}
+
+
+
 int main()
 {
 /***************** Drive Control *****************/
     
-    joystick.Axis3.changed(nlDrive_lTank);
-    joystick.Axis2.changed(nlDrive_rTank);
+    joystick.ButtonL1.pressed(controlSwitch);
+    
+    //joystick.Axis3.changed(nlDrive_lTank);
+    //joystick.Axis2.changed(nlDrive_rTank);
  
     //joystick.Axis3.changed(nlDrive_lArcade);
     //joystick.Axis2.changed(nlDrive_rArcade);
