@@ -114,6 +114,39 @@ void nlDrive_rArcade()
     mDrive_r2.spin(directionType::fwd, speed, velocityUnits::pct);
 }
 
+void nlDrive_lSplitArcade()
+{
+    int speed = ( joystick.Axis3.value() + joystick.Axis1.value() ) / 2;
+    if (abs(speed) < 5)
+        speed = 0;
+    else
+        speed = ( (speed^2/100) * speed ) / 100;
+    
+    if ((( joystick.Axis3.value() + joystick.Axis1.value() ) / 2) < 0)
+        speed = speed * -1;
+    else
+        speed = speed *  1;
+    
+    mDrive_l1.spin(directionType::fwd, speed, velocityUnits::pct);
+    mDrive_l2.spin(directionType::fwd, speed, velocityUnits::pct);
+}
+void nlDrive_rSplitArcade()
+{
+    int speed = ( joystick.Axis3.value() - joystick.Axis1.value() ) / 2;
+    if (abs(speed) < 5)
+        speed = 0;
+    else
+        speed = ( (speed^2/100) * speed ) / 100;
+    
+    if ((( joystick.Axis3.value() - joystick.Axis1.value() ) / 2) < 0)
+        speed = speed * -1;
+    else
+        speed = speed *  1;
+    
+    mDrive_r1.spin(directionType::fwd, speed, velocityUnits::pct);
+    mDrive_r2.spin(directionType::fwd, speed, velocityUnits::pct);
+}
+
 int main()
 {
 /***************** Drive Control *****************/
@@ -121,8 +154,11 @@ int main()
     joystick.Axis3.changed(nlDrive_lTank);
     joystick.Axis2.changed(nlDrive_rTank);
  
-    joystick.Axis3.changed(nlDrive_lArcade);
-    joystick.Axis2.changed(nlDrive_rArcade);
+    //joystick.Axis3.changed(nlDrive_lArcade);
+    //joystick.Axis2.changed(nlDrive_rArcade);
+    
+    //joystick.Axis3.changed(nlDrive_lSplitArcade);
+    //joystick.Axis2.changed(nlDrive_rSplitArcade);
     
 /************* Ball Intake & Indexer *************/
     
