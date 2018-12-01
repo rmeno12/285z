@@ -159,11 +159,9 @@ void rIndexer()
     {indexer.spin(directionType::fwd, -100, velocityUnits::pct);}
 
 void autonomous( void ) {
-    resetMotors();
-    flywheel.spin(directionType::fwd, 170, velocityUnits::rpm);
+    resetMotors();    
     
-    
-    int step1 {-1200}; //1200
+    int step1 {1200}; //1200
     ballIntake.spin(directionType::fwd, 50, velocityUnits::pct);
     
     moveLeft(step1, 50);
@@ -174,9 +172,11 @@ void autonomous( void ) {
     }
     this_thread::sleep_for(200);
     resetMotors();                     
-
+    
     moveLeft(-step1, 50);
     moveRight(-step1, 50);
+    
+    flywheel.spin(directionType::fwd, 170, velocityUnits::rpm);
     
     while(leftDriveFront.rotation(rotationUnits::deg) > (-step1 + 50)){
         this_thread::sleep_for(10);
@@ -184,7 +184,7 @@ void autonomous( void ) {
     this_thread::sleep_for(200);
     resetMotors();                     
                 
-    int step2 {-210}; //210
+    int step2 {210}; //210
     moveRight(step2, 50);
     moveLeft(-step2, 50);
     
