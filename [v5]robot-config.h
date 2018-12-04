@@ -12,5 +12,7 @@ motor flywheel(PORT5, false);
 motor ballIntake(PORT6, true);
 motor indexer(PORT7, true);
 
-line Line = line(Brain.ThreeWirePort.A);
-gyro Gyro = gyro(Brain.ThreeWirePort.B);
+line aLine = line(Brain.ThreeWirePort.A);
+line bLine = line(Brain.ThreeWirePort.B);
+
+gyro Gyro = gyro(Brain.ThreeWirePort.C);
