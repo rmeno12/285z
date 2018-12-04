@@ -1,6 +1,6 @@
 #include "robot-config.h"
 /*---------------------------------------------------------------------------*/
-/*                                                                           */
+/*                                                                           */ 
 /*        Description: Competition template for VCS VEX V5                    */
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
@@ -18,7 +18,7 @@ vex::competition    Competition;
 /*  not every time that the robot is disabled.                               */
 /*---------------------------------------------------------------------------*/
 
-int printShit(){
+int printShit(){ 
     static int leftAvg {0};
     static int rightAvg {0};
     static int rot {0};
@@ -40,7 +40,7 @@ void printStuff(){
     static int rot {0};
     
     while(1){
-        leftAvg = (leftDriveFront.rotation(rotationUnits::deg) + leftDriveBack.rotation(rotationUnits::deg)) / 2;
+        leftAvg = (leftDriveFront.rotation(rotationUnits::deg) + leftDriveBack.rotation(rotationUnits::deg)) / 2; 
         rightAvg = (rightDriveFront.rotation(rotationUnits::deg) + rightDriveBack.rotation(rotationUnits::deg)) / 2;
         rot = Gyro.value(vex::rotationUnits::deg);
         Brain.Screen.printAt(10, 30, "%d", leftAvg);
@@ -49,11 +49,29 @@ void printStuff(){
     }
 }
 
+bool brakeToggle = false;
+
+void toggleBrake(){
+    brakeToggle = !brakeToggle;
+    if(brakeToggle){
+        leftDriveFront.setStopping(brakeType::brake);
+        leftDriveBack.setStopping(brakeType::brake);
+        rightDriveFront.setStopping(brakeType::brake);
+        rightDriveBack.setStopping(brakeType::brake);
+    }
+    else{
+        leftDriveFront.setStopping(brakeType::coast);
+        leftDriveBack.setStopping(brakeType::coast);
+        rightDriveFront.setStopping(brakeType::coast);
+        rightDriveBack.setStopping(brakeType::coast);
+    }
+}
+
 void pre_auton( void ) {
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
   
-    Gyro.startCalibration();
+    Gyro.startCalibration(); 
     Gyro.changed(printStuff);
 }
 
@@ -67,54 +85,54 @@ void pre_auton( void ) {
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 void driveLeft(){
-    int scaledPower {Controller.Axis3.value()};
-    
+    int scaledPower {Controller.Axis3.value()}; 
+     
     if (abs(scaledPower) < 5)
         scaledPower = 0;
     else
         scaledPower = ( (scaledPower^2/100) * scaledPower ) / 100;
     
-    if (Controller.Axis3.value() < 0)
-        scaledPower = scaledPower * -0.8;
+    if (Controller.Axis3.value() < 0) 
+        scaledPower = scaledPower * -0.6;
     else
-        scaledPower = scaledPower *  0.8;
+        scaledPower = scaledPower *  0.6;
     
-    leftDriveFront.spin(directionType::fwd, scaledPower, velocityUnits::pct);
-    leftDriveBack.spin(directionType::fwd, scaledPower, velocityUnits::pct);
+    leftDriveFront.spin(directionType::fwd, scaledPower, velocityUnits::pct); 
+    leftDriveBack.spin(directionType::fwd, scaledPower, velocityUnits::pct); 
 }
 
 void driveRight(){
-    int scaledPower {Controller.Axis2.value()};
+    int scaledPower {Controller.Axis2.value()}; 
     
     if (abs(scaledPower) < 5)
         scaledPower = 0;
     else
         scaledPower = ( (scaledPower^2/100) * scaledPower ) / 100;
     
-    if (Controller.Axis2.value() < 0)
-        scaledPower = scaledPower * -0.8;
+    if (Controller.Axis2.value() < 0) 
+        scaledPower = scaledPower * -0.6;
     else
-        scaledPower = scaledPower *  0.8;
+        scaledPower = scaledPower *  0.6;
     
-    rightDriveFront.spin(directionType::fwd, scaledPower, velocityUnits::pct);
-    rightDriveBack.spin(directionType::fwd, scaledPower, velocityUnits::pct);
+    rightDriveFront.spin(directionType::fwd, scaledPower, velocityUnits::pct); 
+    rightDriveBack.spin(directionType::fwd, scaledPower, velocityUnits::pct); 
 }
 
 void moveLeft(int distance, int power){
-    leftDriveFront.startRotateFor(distance, rotationUnits::deg, power, velocityUnits::pct);
-    leftDriveBack.startRotateFor(distance, rotationUnits::deg, power, velocityUnits::pct);
+    leftDriveFront.startRotateFor(distance, rotationUnits::deg, power, velocityUnits::pct); 
+    leftDriveBack.startRotateFor(distance, rotationUnits::deg, power, velocityUnits::pct); 
 }
 
 void moveRight(int distance, int power){
-    rightDriveFront.startRotateFor(distance, rotationUnits::deg, power, velocityUnits::pct);
-    rightDriveBack.startRotateFor(distance, rotationUnits::deg, power, velocityUnits::pct);
+    rightDriveFront.startRotateFor(distance, rotationUnits::deg, power, velocityUnits::pct); 
+    rightDriveBack.startRotateFor(distance, rotationUnits::deg, power, velocityUnits::pct); 
 }
 
 void resetMotors(){
-    rightDriveFront.setRotation(0, rotationUnits::deg);
-    rightDriveBack.setRotation(0, rotationUnits::deg);
-    leftDriveFront.setRotation(0, rotationUnits::deg);
-    leftDriveBack.setRotation(0, rotationUnits::deg);
+    rightDriveFront.setRotation(0, rotationUnits::deg); 
+    rightDriveBack.setRotation(0, rotationUnits::deg); 
+    leftDriveFront.setRotation(0, rotationUnits::deg); 
+    leftDriveBack.setRotation(0, rotationUnits::deg); 
 }
 
 static bool reverse {false};
@@ -125,13 +143,15 @@ void toggleIntake()
     toggle = !toggle;
 
     if (toggle)
-        ballIntake.spin(directionType::fwd, 100, velocityUnits::pct);
+        ballIntake.spin(directionType::fwd, 100, velocityUnits::pct); 
     else
         ballIntake.spin(directionType::fwd, 0, velocityUnits::pct);
 }
 
 void puIntake()
-    {ballIntake.spin(directionType::fwd, 100, velocityUnits::pct);}
+{
+    ballIntake.spin(directionType::fwd, 100, velocityUnits::pct);
+}
 void pdIntake()
 {
     ballIntake.spin(directionType::fwd, 0, velocityUnits::pct);
@@ -158,8 +178,48 @@ void pdIndexer()
 void rIndexer()
     {indexer.spin(directionType::fwd, -100, velocityUnits::pct);}
 
-void autonomous( void ) {
-    resetMotors();    
+void lowFlagPark()
+{
+    task distanceMonitor(printShit);
+    resetMotors();
+    
+    int step1 {1250};
+    moveRight(step1, 50);
+    moveLeft(step1, 50);
+    
+    	
+    
+    this_thread::sleep_for(200);
+    resetMotors();                     
+            
+    int step2 {-step1 -720};
+    moveRight(step2, 50);
+    moveLeft(step2, 50);
+  
+    while(leftDriveFront.rotation(rotationUnits::deg) > (step2 + 50)){
+        this_thread::sleep_for(10);
+    }
+    
+    this_thread::sleep_for(200);
+    resetMotors();                     
+                         
+    moveRight(-205, 50);
+    moveLeft(205, 50);
+                         
+    while(leftDriveFront.rotation(rotationUnits::deg) < 200){
+        this_thread::sleep_for(10);
+    }
+    
+    this_thread::sleep_for(200); 
+    resetMotors();
+    
+    int step3 {1725};
+    moveRight(step3, 80);
+    moveLeft(step3, 80);
+}
+
+void getBall()
+{
     
     int step1 {1200}; //1200
     ballIntake.spin(directionType::fwd, 50, velocityUnits::pct);
@@ -175,37 +235,182 @@ void autonomous( void ) {
     
     moveLeft(-step1, 50);
     moveRight(-step1, 50);
-    
+    Brain.Screen.setPenWidth(5);
     flywheel.spin(directionType::fwd, 170, velocityUnits::rpm);
     
-    while(leftDriveFront.rotation(rotationUnits::deg) > (-step1 + 50)){
+    while(leftDriveFront.rotation(rotationUnits::deg) > (-step1 + 60)){
         this_thread::sleep_for(10);
     }
     this_thread::sleep_for(200);
-    resetMotors();                     
-                
-    int step2 {210}; //210
+    resetMotors();
+}
+    
+void blueTurn()
+{
+    int step2 {220}; //210
+    moveRight(-step2, 50);
+    moveLeft(step2, 50);
+    
+    while(leftDriveFront.rotation(rotationUnits::deg) < step2 -5){
+        this_thread::sleep_for(10);
+    }
+    this_thread::sleep_for(200); 
+    resetMotors();
+}
+
+void redTurn()
+{
+    int step2 {220}; //210
     moveRight(step2, 50);
     moveLeft(-step2, 50);
     
-    while(leftDriveFront.rotation(rotationUnits::deg) < step2-5){
+    while(leftDriveFront.rotation(rotationUnits::deg) > -step2 +5){
         this_thread::sleep_for(10);
     }
     this_thread::sleep_for(200); 
     resetMotors();
-    
-    int counter {0};
-    while(flywheel.velocity(velocityUnits::rpm) == 170 && counter < 500){
-        counter++;
-        indexer.spin(directionType::fwd, 100, velocityUnits::pct);
-        ballIntake.spin(directionType::fwd, 100, velocityUnits::pct);
-    }
-    
-    while(counter < 500){
-        this_thread::sleep_for(10);
-    }
+}
+
+void getRowRed()
+{
+
+    redTurn();
+        
+    puIndexer();
+    this_thread::sleep_for(1000); 
+
+//    while(){
+//        this_thread::sleep_for(10);
+//    }
     this_thread::sleep_for(200); 
     resetMotors();
+    pdIndexer();
+    
+    int step3 {1255};
+    moveRight(step3, 50);
+    moveLeft(step3, 50);
+    
+    while(leftDriveFront.rotation(rotationUnits::deg) < (step3 - 50)){
+        this_thread::sleep_for(10);
+    }	
+    
+    this_thread::sleep_for(200);
+    resetMotors();  
+
+    int step4 {-step3 -700};
+    moveRight(step4, 50);
+    moveLeft(step4, 50);
+  
+    while(leftDriveFront.rotation(rotationUnits::deg) > (step4 + 50)){
+        this_thread::sleep_for(10);
+    }
+    
+    this_thread::sleep_for(200);
+    resetMotors();                     
+    
+    blueTurn();
+    
+    this_thread::sleep_for(200); 
+    resetMotors();
+    
+    int step5 {1725};
+    moveRight(step5, 80);
+    moveLeft(step5, 80);
+
+}
+
+void getRowBlue()
+{
+    //redTurn();
+    blueTurn();
+    
+    puIndexer();
+    this_thread::sleep_for(1000); 
+
+//    while(){
+//        this_thread::sleep_for(10);
+//    }
+    this_thread::sleep_for(200); 
+    resetMotors();
+    pdIndexer();
+    
+    int step3 {1255};
+    moveRight(step3, 50);
+    moveLeft(step3, 50);
+    
+    while(leftDriveFront.rotation(rotationUnits::deg) < (step3 - 50)){
+        this_thread::sleep_for(10);
+    }	
+    
+    this_thread::sleep_for(200);
+    resetMotors();  
+
+    int step4 {-step3 -700};
+    moveRight(step4, 50);
+    moveLeft(step4, 50);
+  
+    while(leftDriveFront.rotation(rotationUnits::deg) > (step4 + 50)){
+        this_thread::sleep_for(10);
+    }
+    
+    this_thread::sleep_for(200);
+    resetMotors();                     
+    
+    //blueTurn();
+    redTurn();
+    
+    this_thread::sleep_for(200); 
+    resetMotors();
+    
+    int step5 {1725};
+    moveRight(step5, 80);
+    moveLeft(step5, 80);
+}
+
+void finalTonRed()
+{
+    flywheel.spin(directionType::fwd, 153, velocityUnits::rpm);//-107,-299//187
+    this_thread::sleep_for(5500);
+    puIndexer();
+    this_thread::sleep_for(2000);
+    pdIndexer();
+    puIntake();
+    flywheel.spin(directionType::fwd, 191, velocityUnits::rpm);
+    
+    blueTurn();
+    getBall();
+    redTurn();
+    pdIntake();
+    
+    moveLeft(-107, 50);
+    moveRight(-300, 50);
+    
+    while(leftDriveFront.rotation(rotationUnits::deg) > -107 +5){
+        this_thread::sleep_for(10);
+    }
+    this_thread::sleep_for(1000); 
+    resetMotors();
+    
+    puIndexer();
+}
+
+void autonomous( void ) {
+    resetMotors();  
+    task distanceMonitor(printShit);                     
+   /*            
+    getBall();
+    
+    bool isRed {1};
+    if(isRed)
+        getRowRed();     
+    else
+        getRowBlue();
+            
+    //goPark();
+    
+    //lowFlagPark();
+    */
+    finalTonRed();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -218,7 +423,21 @@ void autonomous( void ) {
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
+void fluxFly()
+{
+    int lineValue = (aLine.value(vex::percentUnits::pct) + bLine.value(vex::percentUnits::pct)) / 2;
+    if(lineValue <69)
+        flywheel.spin(directionType::fwd, 170, velocityUnits::rpm);
+    else
+        flywheel.spin(directionType::fwd, 50, velocityUnits::rpm);
+}
+
 void usercontrol( void ) {
+    flywheel.spin(directionType::fwd, 170, velocityUnits::rpm);//-107,-299//187
+    //Controller.ButtonX.pressed(finalTonRed);
+    //aLine.changed(fluxFly);
+    //bLine.changed(fluxFly);
+    
     leftDriveFront.setStopping(brakeType::coast);
     leftDriveBack.setStopping(brakeType::coast);
     rightDriveFront.setStopping(brakeType::coast);
@@ -237,6 +456,8 @@ void usercontrol( void ) {
     
     Controller.Axis2.changed(driveRight);
     Controller.Axis3.changed(driveLeft);
+    
+    Controller.ButtonA.pressed(toggleBrake);
 }
 
 
