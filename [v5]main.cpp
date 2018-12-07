@@ -14,6 +14,35 @@ void pre_auton( void ) {
 void autonomous( void ) {
     resetMotors();  
     task distanceMonitor(printShit);
+    
+    moveLeft(1200, 50);
+    moveRight(1200, 50);
+    ballIntake.spin(directionType::fwd, 100, velocityUnits::pct);
+    
+    while(rightDriveFront.rotation(rotationUnits::deg) < 1195){
+        this_thread::sleep_for(10);
+    }
+    this_thread::sleep_for(200);
+    resetMotors();
+    ballIntake.stop();
+    
+    moveLeft(-1200, 50);
+    moveRight(-1200, 50);
+    
+    while(rightDriveFront.rotation(rotationUnits::deg) > -1195){
+        this_thread::sleep_for(10);
+    }
+    this_thread::sleep_for(200);
+    resetMotors();
+    
+    moveLeft(-230, 25);
+    moveRight(230, 25);
+    
+    while(rightDriveFront.rotation(rotationUnits::deg) < 225){
+        this_thread::sleep_for(10);
+    }
+    this_thread::sleep_for(200);
+    resetMotors();
 }
 
 void usercontrol( void ) {
